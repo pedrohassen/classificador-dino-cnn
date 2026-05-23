@@ -1,0 +1,29 @@
+# Dependências do Node.js
+node_modules/
+npm-debug.log*
+
+# Ambiente Virtual do Python
+.venv/
+venv/
+pyvenv.cfg
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Pesos do Modelo (Arquivos binários pesados)
+models_saved/
+*.pth
+
+# Ignorar os uploads temporários gerados pelo server dentro de .runtime
+.runtime/uploads/
+*.jpg
+*.jpeg
+*.png
+*.webp
+
+# Sistema Operacional e Resquícios de Compressão
+.vscode/
+.DS_Store
+Thumbs.db
+__MACOSX/

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNN Classificador de Imagens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .upload-area {
+            border: 3px dashed #2d5016;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f0f5f0;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #3a6b35;
+            background: #e8f2e8;
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #3a6b35;
+            background: #dceedd;
+            transform: scale(1.05);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .preview-section {
+            display: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(45, 80, 22, 0.4);
+        }
+
+        .btn-upload:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-clear {
+            background: #e0e0e0;
+            color: #333;
+            flex: 1;
+        }
+
+        .btn-clear:hover {
+            background: #d0d0d0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2d5016;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .main-result {
+            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .predicted-class {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .confidence-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .confidence-percent {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            width: 0%;
+        }
+
+        .top-predictions {
+            margin-top: 30px;
+        }
+
+        .top-predictions h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .prediction-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f0f5f0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .prediction-item:hover {
+            background: #e8f2e8;
+            transform: translateX(5px);
+        }
+
+        .prediction-rank {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .prediction-info {
+            flex: 1;
+        }
+
+        .prediction-class {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .prediction-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .prediction-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2d5016 0%, #3a6b35 100%);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+
+        .prediction-percent {
+            font-weight: bold;
+            color: #2d5016;
+            margin-left: 10px;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .error-message {
+            display: none;
+            background: #ffe0e0;
+            border-left: 4px solid #ff6b6b;
+            color: #c92a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .dino-classes-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8faf8;
+            border-radius: 12px;
+            border: 1px solid #e2ebe2;
+        }
+
+        .classes-label {
+            display: block;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #555;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .dino-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dino-tag {
+            background-color: #e8f2e8;
+            color: #2d5016;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #dceedd;
+            transition: all 0.2s ease;
+        }
+
+        .dino-tag:hover {
+            background-color: #2d5016;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .upload-area {
+                padding: 25px;
+            }
+
+            .main-result {
+                padding: 20px;
+            }
+
+            .predicted-class {
+                font-size: 1.5em;
+            }
+
+            .confidence-percent {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦕 Classificador Dino</h1>
+            <p class="subtitle">Envie uma imagem para classificação instantânea</p>
+
+            <div class="dino-classes-container">
+                <span class="classes-label">Espécies conhecidas pelo modelo:</span>
+                <div class="dino-tags">
+                    <span class="dino-tag">Triceratops</span>
+                    <span class="dino-tag">Tiranossauro</span>
+                    <span class="dino-tag">Gallimimus</span>
+                    <span class="dino-tag">Dimorphodon</span>
+                    <span class="dino-tag">Brachiosaurus</span>
+                    <span class="dino-tag">Ankylosaurus</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Clique ou arraste uma imagem aqui</div>
+            <div class="upload-hint">Formatos suportados: JPEG, PNG, WEBP, BMP (até 8MB)</div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp">
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <img id="imagePreview" class="image-preview" alt="Preview">
+            <div class="button-group">
+                <button class="btn-upload" id="submitBtn">Classificar Imagem</button>
+                <button class="btn-clear" id="clearBtn">Limpar</button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Classificando imagem...</div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="main-result">
+                <div class="predicted-class" id="predictedClass">-</div>
+                <div class="confidence-display">
+                    <div class="confidence-percent" id="confidencePercent">0%</div>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill"></div>
+                </div>
+            </div>
+
+            <div class="top-predictions">
+                <h3>Top 3 Previsões</h3>
+                <div id="topPredictionsList"></div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-clear" id="resetBtn">Tentar Outra Imagem</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewSection = document.getElementById('previewSection');
+        const submitBtn = document.getElementById('submitBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const resetBtn = document.getElementById('resetBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let selectedFile = null;
+
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewSection.classList.add('active');
+                uploadArea.style.display = 'none';
+                clearError();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Clear button
+        clearBtn.addEventListener('click', resetUpload);
+        resetBtn.addEventListener('click', resetUpload);
+
+        function resetUpload() {
+            selectedFile = null;
+            fileInput.value = '';
+            previewSection.classList.remove('active');
+            resultsSection.classList.remove('active');
+            loading.classList.remove('active');
+            uploadArea.style.display = 'block';
+            clearError();
+        }
+
+        // Submit button
+        submitBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            previewSection.classList.remove('active');
+            loading.classList.add('active');
+            resultsSection.classList.remove('active');
+
+            try {
+                const response = await fetch('http://localhost:3000/infer', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.ok) {
+                    showError(data.error || 'Erro ao classificar imagem');
+                    loading.classList.remove('active');
+                    previewSection.classList.add('active');
+                    return;
+                }
+
+                displayResults(data);
+                loading.classList.remove('active');
+                resultsSection.classList.add('active');
+
+            } catch (error) {
+                showError('Erro ao conectar com a API: ' + error.message);
+                loading.classList.remove('active');
+                previewSection.classList.add('active');
+            }
+        });
+
+        function displayResults(data) {
+            const result = data.result || data;
+
+            // Main prediction
+            document.getElementById('predictedClass').textContent = result.predictedClass;
+            const confidencePercent = Math.round(result.confidence * 100);
+            document.getElementById('confidencePercent').textContent = confidencePercent + '%';
+
+            // Confidence bar animation
+            setTimeout(() => {
+                document.getElementById('confidenceFill').style.width = confidencePercent + '%';
+            }, 100);
+
+            // Top predictions
+            const topList = document.getElementById('topPredictionsList');
+            topList.innerHTML = '';
+
+            result.topPredictions.forEach((pred, index) => {
+                const percent = Math.round(pred.confidence * 100);
+                const item = document.createElement('div');
+                item.className = 'prediction-item';
+                item.innerHTML = `
+                    <div class="prediction-rank">#${index + 1}</div>
+                    <div class="prediction-info">
+                        <div class="prediction-class">${pred.class}</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="prediction-bar">
+                                <div class="prediction-fill" style="width: ${percent}%;"></div>
+                            </div>
+                            <div class="prediction-percent">${percent}%</div>
+                        </div>
+                    </div>
+                `;
+                topList.appendChild(item);
+
+                // Animate the bars sequentially
+                setTimeout(() => {
+                    const fill = item.querySelector('.prediction-fill');
+                    fill.style.width = percent + '%';
+                }, (index + 1) * 150);
+            });
+        }
+
+        function showError(message) {
+            errorMessage.textContent = '⚠️ ' + message;
+            errorMessage.classList.add('active');
+        }
+
+        function clearError() {
+            errorMessage.classList.remove('active');
+            errorMessage.textContent = '';
+        }
+    </script>
+</body>
+</html>
