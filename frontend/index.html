@@ -3,8 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNN Classificador de Imagens</title>
+    <title>Classificador Dino</title>
     <style>
+        :root {
+            --cor-primaria: #1b4332;
+            --cor-primaria-clara: #2d6a4f;
+            --cor-acento: #d9a441;
+            --fundo: #f2f5f2;
+            --superficie: #ffffff;
+            --texto: #1a1f1c;
+            --texto-suave: #667066;
+            --borda: #e2e8e3;
+            --sombra: rgba(27, 67, 50, 0.14);
+            --erro-fundo: #fdecec;
+            --erro-borda: #e0554f;
+            --erro-texto: #9c2b26;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --cor-primaria: #3a8066;
+                --cor-primaria-clara: #4f9c7f;
+                --fundo: #101412;
+                --superficie: #1a201c;
+                --texto: #e9ece9;
+                --texto-suave: #9aa89f;
+                --borda: #2a332c;
+                --sombra: rgba(0, 0, 0, 0.4);
+                --erro-fundo: #2c1917;
+                --erro-borda: #b0453f;
+                --erro-texto: #f0a29d;
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,81 +43,141 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--fundo);
+            color: var(--texto);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 40px 20px;
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 800px;
+            background: var(--superficie);
+            border: 1px solid var(--borda);
+            border-radius: 24px;
+            box-shadow: 0 24px 60px var(--sombra);
+            max-width: 720px;
             width: 100%;
             padding: 40px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         h1 {
-            color: #333;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 2.2em;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
         }
 
         .subtitle {
-            color: #666;
-            font-size: 1.1em;
+            color: var(--texto-suave);
+            font-size: 1.05em;
+        }
+
+        .dino-classes-container {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--fundo);
+            border-radius: 14px;
+            border: 1px solid var(--borda);
+        }
+
+        .classes-label {
+            display: block;
+            font-size: 0.78em;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--texto-suave);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .dino-tags {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dino-tag {
+            background: var(--superficie);
+            color: var(--cor-primaria);
+            font-size: 0.88em;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--borda);
+            transition: all 0.2s ease;
+        }
+
+        .dino-tag:hover {
+            background: var(--cor-primaria);
+            color: white;
+            border-color: var(--cor-primaria);
+        }
+
+        .aviso-limitacao {
+            margin-top: 14px;
+            font-size: 0.85em;
+            color: var(--texto-suave);
+            line-height: 1.5;
+        }
+
+        .error-message {
+            display: none;
+            background: var(--erro-fundo);
+            border-left: 4px solid var(--erro-borda);
+            color: var(--erro-texto);
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+
+        .error-message.active {
+            display: block;
         }
 
         .upload-area {
-            border: 3px dashed #2d5016;
-            border-radius: 15px;
-            padding: 40px;
+            border: 2px dashed var(--borda);
+            border-radius: 18px;
+            padding: 44px 24px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f0f5f0;
-            margin-bottom: 30px;
+            transition: all 0.25s ease;
+            background: var(--fundo);
+            margin-bottom: 28px;
         }
 
         .upload-area:hover {
-            border-color: #3a6b35;
-            background: #e8f2e8;
-            transform: scale(1.02);
+            border-color: var(--cor-primaria-clara);
+            background: color-mix(in srgb, var(--cor-primaria-clara) 6%, var(--fundo));
         }
 
         .upload-area.dragover {
-            border-color: #3a6b35;
-            background: #dceedd;
-            transform: scale(1.05);
+            border-color: var(--cor-primaria);
+            transform: scale(1.01);
         }
 
         .upload-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+            color: var(--texto-suave);
+            margin-bottom: 14px;
         }
 
         .upload-text {
-            color: #333;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
         }
 
         .upload-hint {
-            color: #999;
-            font-size: 0.9em;
+            color: var(--texto-suave);
+            font-size: 0.88em;
         }
 
         input[type="file"] {
@@ -96,7 +187,7 @@
         .preview-section {
             display: none;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         .preview-section.active {
@@ -106,58 +197,61 @@
         .image-preview {
             max-width: 100%;
             max-height: 300px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.2);
+            border-radius: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 12px 30px var(--sombra);
         }
 
         .button-group {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin-bottom: 30px;
         }
 
         button {
-            padding: 12px 30px;
+            padding: 12px 28px;
             border: none;
-            border-radius: 25px;
-            font-size: 1em;
+            border-radius: 999px;
+            font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            font-family: inherit;
         }
 
         .btn-upload {
-            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            background: var(--cor-primaria);
             color: white;
             flex: 1;
         }
 
         .btn-upload:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(45, 80, 22, 0.4);
+            background: var(--cor-primaria-clara);
+            transform: translateY(-1px);
         }
 
         .btn-upload:disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
 
         .btn-clear {
-            background: #e0e0e0;
-            color: #333;
+            background: var(--fundo);
+            color: var(--texto);
+            border: 1px solid var(--borda);
             flex: 1;
         }
 
         .btn-clear:hover {
-            background: #d0d0d0;
+            background: var(--borda);
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 30px;
+            padding: 36px 0;
+            color: var(--texto-suave);
         }
 
         .loading.active {
@@ -165,13 +259,13 @@
         }
 
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2d5016;
+            border: 3px solid var(--borda);
+            border-top: 3px solid var(--cor-primaria);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
@@ -188,85 +282,75 @@
         }
 
         .main-result {
-            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
+            background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-primaria-clara) 100%);
             color: white;
-            padding: 30px;
-            border-radius: 15px;
+            padding: 28px;
+            border-radius: 18px;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         .predicted-class {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .confidence-display {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: capitalize;
         }
 
         .confidence-percent {
-            font-size: 2.5em;
-            font-weight: bold;
+            font-size: 2.4em;
+            font-weight: 700;
         }
 
         .confidence-bar {
             width: 100%;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
             overflow: hidden;
-            margin-top: 15px;
+            margin-top: 16px;
         }
 
         .confidence-fill {
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
+            background: var(--cor-acento);
+            border-radius: 999px;
             transition: width 0.8s ease;
             width: 0%;
         }
 
-        .top-predictions {
-            margin-top: 30px;
-        }
-
         .top-predictions h3 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.3em;
+            color: var(--texto-suave);
+            margin-bottom: 16px;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
         }
 
         .prediction-item {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f0f5f0;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .prediction-item:hover {
-            background: #e8f2e8;
-            transform: translateX(5px);
+            margin-bottom: 10px;
+            padding: 14px 16px;
+            background: var(--fundo);
+            border: 1px solid var(--borda);
+            border-radius: 12px;
         }
 
         .prediction-rank {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #2d5016 0%, #3a6b35 100%);
-            color: white;
+            width: 32px;
+            height: 32px;
+            background: var(--superficie);
+            border: 1px solid var(--borda);
+            color: var(--texto-suave);
             border-radius: 50%;
-            font-weight: bold;
-            margin-right: 15px;
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-right: 14px;
             flex-shrink: 0;
         }
 
@@ -276,113 +360,49 @@
 
         .prediction-class {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            text-transform: capitalize;
         }
 
         .prediction-bar {
             width: 100%;
-            height: 8px;
-            background: #e0e0e0;
-            border-radius: 4px;
+            height: 6px;
+            background: var(--borda);
+            border-radius: 999px;
             overflow: hidden;
         }
 
         .prediction-fill {
             height: 100%;
-            background: linear-gradient(90deg, #2d5016 0%, #3a6b35 100%);
-            border-radius: 4px;
+            background: var(--cor-primaria-clara);
+            border-radius: 999px;
             width: 0%;
             transition: width 0.6s ease;
         }
 
         .prediction-percent {
-            font-weight: bold;
-            color: #2d5016;
-            margin-left: 10px;
-            min-width: 50px;
+            font-weight: 700;
+            color: var(--cor-primaria-clara);
+            margin-left: 12px;
+            min-width: 44px;
             text-align: right;
         }
 
-        .error-message {
-            display: none;
-            background: #ffe0e0;
-            border-left: 4px solid #ff6b6b;
-            color: #c92a2a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .error-message.active {
-            display: block;
-        }
-
-        .dino-classes-container {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f8faf8;
-            border-radius: 12px;
-            border: 1px solid #e2ebe2;
-        }
-
-        .classes-label {
-            display: block;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #555;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .dino-tags {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .dino-tag {
-            background-color: #e8f2e8;
-            color: #2d5016;
-            font-size: 0.9em;
-            font-weight: 600;
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid #dceedd;
-            transition: all 0.2s ease;
-        }
-
-        .dino-tag:hover {
-            background-color: #2d5016;
-            color: white;
-            transform: translateY(-1px);
+        .results-section > .button-group {
+            margin-top: 24px;
         }
 
         @media (max-width: 600px) {
             .container {
-                padding: 20px;
+                padding: 24px;
             }
 
             h1 {
-                font-size: 1.8em;
+                font-size: 1.7em;
             }
 
             .upload-area {
-                padding: 25px;
-            }
-
-            .main-result {
-                padding: 20px;
-            }
-
-            .predicted-class {
-                font-size: 1.5em;
-            }
-
-            .confidence-percent {
-                font-size: 1.8em;
+                padding: 28px 16px;
             }
         }
     </style>
@@ -390,29 +410,38 @@
 <body>
     <div class="container">
         <header>
-            <h1>🦕 Classificador Dino</h1>
+            <h1>Classificador Dino</h1>
             <p class="subtitle">Envie uma imagem para classificação instantânea</p>
 
             <div class="dino-classes-container">
-                <span class="classes-label">Espécies conhecidas pelo modelo:</span>
+                <span class="classes-label">Espécies conhecidas pelo modelo</span>
                 <div class="dino-tags">
                     <span class="dino-tag">Triceratops</span>
-                    <span class="dino-tag">Tiranossauro</span>
+                    <span class="dino-tag">Tyrannosaurus</span>
                     <span class="dino-tag">Gallimimus</span>
                     <span class="dino-tag">Dimorphodon</span>
                     <span class="dino-tag">Brachiosaurus</span>
                     <span class="dino-tag">Ankylosaurus</span>
                 </div>
+                <p class="aviso-limitacao">
+                    O modelo foi treinado com ilustrações, renders 3D e arte gerada por IA —
+                    funciona melhor com imagens nesse estilo. Fotos reais (brinquedos, museus,
+                    fósseis) podem confundir o modelo mais do que arte digital.
+                </p>
             </div>
         </header>
 
         <div class="error-message" id="errorMessage"></div>
 
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📸</div>
+            <svg class="upload-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                <polyline points="7 9 12 4 17 9" />
+                <line x1="12" y1="4" x2="12" y2="16" />
+            </svg>
             <div class="upload-text">Clique ou arraste uma imagem aqui</div>
-            <div class="upload-hint">Formatos suportados: JPEG, PNG, WEBP, BMP (até 8MB)</div>
-            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/bmp">
+            <div class="upload-hint">Formatos suportados: JPEG, PNG, WEBP</div>
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
         </div>
 
         <div class="preview-section" id="previewSection">
@@ -431,21 +460,19 @@
         <div class="results-section" id="resultsSection">
             <div class="main-result">
                 <div class="predicted-class" id="predictedClass">-</div>
-                <div class="confidence-display">
-                    <div class="confidence-percent" id="confidencePercent">0%</div>
-                </div>
+                <div class="confidence-percent" id="confidencePercent">0%</div>
                 <div class="confidence-bar">
                     <div class="confidence-fill" id="confidenceFill"></div>
                 </div>
             </div>
 
             <div class="top-predictions">
-                <h3>Top 3 Previsões</h3>
+                <h3>Top 3 previsões</h3>
                 <div id="topPredictionsList"></div>
             </div>
 
             <div class="button-group">
-                <button class="btn-clear" id="resetBtn">Tentar Outra Imagem</button>
+                <button class="btn-clear" id="resetBtn">Tentar outra imagem</button>
             </div>
         </div>
     </div>
@@ -464,10 +491,8 @@
 
         let selectedFile = null;
 
-        // Upload area click
         uploadArea.addEventListener('click', () => fileInput.click());
 
-        // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -486,7 +511,6 @@
             }
         });
 
-        // File input change
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
                 handleFileSelect(e.target.files[0]);
@@ -505,7 +529,6 @@
             reader.readAsDataURL(file);
         }
 
-        // Clear button
         clearBtn.addEventListener('click', resetUpload);
         resetBtn.addEventListener('click', resetUpload);
 
@@ -519,7 +542,6 @@
             clearError();
         }
 
-        // Submit button
         submitBtn.addEventListener('click', async () => {
             if (!selectedFile) return;
 
@@ -531,15 +553,15 @@
             resultsSection.classList.remove('active');
 
             try {
-                const response = await fetch('http://localhost:3000/infer', {
+                const response = await fetch('/predict', {
                     method: 'POST',
                     body: formData
                 });
 
                 const data = await response.json();
 
-                if (!data.ok) {
-                    showError(data.error || 'Erro ao classificar imagem');
+                if (!response.ok) {
+                    showError(data.detail || 'Erro ao classificar imagem');
                     loading.classList.remove('active');
                     previewSection.classList.add('active');
                     return;
@@ -557,23 +579,18 @@
         });
 
         function displayResults(data) {
-            const result = data.result || data;
-
-            // Main prediction
-            document.getElementById('predictedClass').textContent = result.predictedClass;
-            const confidencePercent = Math.round(result.confidence * 100);
+            document.getElementById('predictedClass').textContent = data.predicted_class;
+            const confidencePercent = Math.round(data.confidence * 100);
             document.getElementById('confidencePercent').textContent = confidencePercent + '%';
 
-            // Confidence bar animation
             setTimeout(() => {
                 document.getElementById('confidenceFill').style.width = confidencePercent + '%';
             }, 100);
 
-            // Top predictions
             const topList = document.getElementById('topPredictionsList');
             topList.innerHTML = '';
 
-            result.topPredictions.forEach((pred, index) => {
+            data.top_predictions.forEach((pred, index) => {
                 const percent = Math.round(pred.confidence * 100);
                 const item = document.createElement('div');
                 item.className = 'prediction-item';
@@ -583,7 +600,7 @@
                         <div class="prediction-class">${pred.class}</div>
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <div class="prediction-bar">
-                                <div class="prediction-fill" style="width: ${percent}%;"></div>
+                                <div class="prediction-fill" style="width: 0%;"></div>
                             </div>
                             <div class="prediction-percent">${percent}%</div>
                         </div>
@@ -591,7 +608,6 @@
                 `;
                 topList.appendChild(item);
 
-                // Animate the bars sequentially
                 setTimeout(() => {
                     const fill = item.querySelector('.prediction-fill');
                     fill.style.width = percent + '%';
@@ -600,7 +616,7 @@
         }
 
         function showError(message) {
-            errorMessage.textContent = '⚠️ ' + message;
+            errorMessage.textContent = message;
             errorMessage.classList.add('active');
         }
 
