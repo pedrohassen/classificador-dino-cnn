@@ -11,10 +11,6 @@ pyvenv.cfg
 __pycache__/
 *.py[cod]
 
-# Pesos do Modelo (Arquivos binários pesados)
-models_saved/
-*.pth
-
 # Dataset (imagens de terceiros, não é asset do repo)
 dataset/
 
