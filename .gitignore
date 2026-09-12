@@ -15,12 +15,14 @@ __pycache__/
 models_saved/
 *.pth
 
+# Dataset (imagens de terceiros, não é asset do repo)
+dataset/
+
+# Configuração local do Claude Code
+.claude/
+
 # Ignorar os uploads temporários gerados pelo server dentro de .runtime
 .runtime/uploads/
-*.jpg
-*.jpeg
-*.png
-*.webp
 
 # Sistema Operacional e Resquícios de Compressão
 .vscode/

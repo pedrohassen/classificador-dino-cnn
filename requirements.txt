@@ -1,3 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
 torch
 torchvision
 pillow
+rembg
+onnxruntime
+scikit-learn
+matplotlib
