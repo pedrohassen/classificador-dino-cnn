@@ -1,0 +1,14 @@
+.git/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+dataset/
+training/
+requirements.txt
+
+.claude/
+.vscode/
+.DS_Store
+Thumbs.db
